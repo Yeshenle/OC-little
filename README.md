@@ -1,122 +1,169 @@
-# OpenCore 0.5+ 部件补丁
+<div align="center" style="text-align: center;">
+<h1>openpilot-pc</h1>
+<b>在pc设备上运行sunnypilot </b>
+</div>
 
-## 说明
+* CPU比较强大
+* 有NVIDIA的GPU
+* 有AMD的GPU
 
-依据 OpenCore 0.5+ 的要求和建议，制作本部件补丁。
+<h3>
+1. 环境安装
+</h3>
 
-## 在线手册
+参考 [webcam安装步骤](tools/webcam/README.md)
 
-本仓库依赖 GitBook 并使用 GitHub Actions 构建了 Pages 服务和 pdf 手册。
-  - [https://ocbook.tlhub.cn](https://ocbook.tlhub.cn)
-  - [OpenCore 部件库](https://cdn.jsdelivr.net/gh/daliansky/OC-little/docs/OpenCore部件库.pdf)
+<h3>
+2. GPU支持
+</h3>
+<h4>
+NVIDIA
+</h4>
 
-## 主要内容
+安装驱动
+参考[官方教程](https://developer.nvidia.com/cudnn-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=24.04&target_type=deb_local)
 
-- **总述**
+以下为官方教程精简:
 
-  1. `ASL`语法基础
-  2. `SSDT` 补丁加载顺序
+```bash
+# 确保安装的nvidia驱动是cuda12
+sudo apt update
+sudo apt install nvidia-cuda-toolkit
+wget https://developer.download.nvidia.com/compute/cudnn/9.7.1/local_installers/cudnn-local-repo-ubuntu2404-9.7.1_1.0-1_amd64.deb
+sudo dpkg -i cudnn-local-repo-ubuntu2404-9.7.1_1.0-1_amd64.deb
+sudo cp /var/cudnn-local-repo-ubuntu2404-9.7.1/cudnn-*-keyring.gpg /usr/share/keyrings/
+sudo apt-get update
+sudo apt-get -y install cudnn
+sudo apt-get -y install cudnn-cuda-12
+```
+![bug修复](docs/assets/ops_cuda.png)
 
-1. **关于`AOAC`**
+按上图修改相应的文件和内容,之后`tools/op.sh build`编译,之后运行就行
 
-   1. 禁止`S3`睡眠
-   2. `AOAC`禁用独显
-   3. 电源空闲管理
-   4. `AOAC`唤醒补丁
-   5. 设置`ASPM`工作模式
-   6. 睡眠自动关闭蓝牙`WIFI`
+默热配置的是`CPU`,按理说安装好相关`GPU`驱动会自动调用相应的`GPU`加速
 
-2. **仿冒设备**
+<h4>
+AMD
+</h4>
 
-   1. 仿冒`EC`
-   2. RTC0
-   3. 键盘无法输入的应急解决方案 `PS2N`
-   4. 仿冒环境光传感器
-   
-3. **二进制更名与预置变量**
+参考官方教程
 
-   1. OC `I2C-GPIO` 补丁
-   2. ASL-AML 对照表
 
-4. **操作系统补丁**
+<h3>
+3. 摄像机参数设置
+</h3>
 
-5. **注入设备**
+首先使用一些常规软件获取摄像头的内参参数(例如GMLCCalibration),主要是内参matrix矩阵
+然后分别修改[camera.py](common/transformations/camera.py)和[ui.h](selfdrive/ui/ui.h)中相应摄像头的内参参数；另外根据自己的需求更改[camera.py](tools/webcam/camera.py)中的相机参数（像素和帧率，帧率最好是20的倍数，例如20,60）
 
-   1. 注入 X86
-   2. `PNLF` 注入方法
-   3. `SBUS(SMBU)` 补丁
+<h3>
+4. 数据分析
+</h3>
 
-6. **添加缺失的部件**
+参考 [juggler数据分析](tools/plotjuggler/README.md)
 
-7. **PS2 键盘映射 @OC-xlivans**
+------
+<div align="center" style="text-align: center;">
+<p>
+  <b>openpilot is an operating system for robotics.</b>
+  <br>
+  Currently, it upgrades the driver assistance system in 275+ supported cars.
+</p>
 
-8. **电池补丁**
+<h3>
+  <a href="https://docs.comma.ai">Docs</a>
+  <span> · </span>
+  <a href="https://docs.comma.ai/contributing/roadmap/">Roadmap</a>
+  <span> · </span>
+  <a href="https://github.com/commaai/openpilot/blob/master/docs/CONTRIBUTING.md">Contribute</a>
+  <span> · </span>
+  <a href="https://discord.comma.ai">Community</a>
+  <span> · </span>
+  <a href="https://comma.ai/shop">Try it on a comma 3X</a>
+</h3>
 
-   1. Thinkpad
-   2. 其它品牌
+Quick start: `bash <(curl -fsSL openpilot.comma.ai)`
 
-9. **禁用 EHCx**
+![openpilot tests](https://github.com/commaai/openpilot/actions/workflows/selfdrive_tests.yaml/badge.svg)
+[![codecov](https://codecov.io/gh/commaai/openpilot/branch/master/graph/badge.svg)](https://codecov.io/gh/commaai/openpilot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![X Follow](https://img.shields.io/twitter/follow/comma_ai)](https://x.com/comma_ai)
+[![Discord](https://img.shields.io/discord/469524606043160576)](https://discord.comma.ai)
 
-10. **`PTSWAK` 综合扩展补丁**
+</div>
 
-11. **`PNP0C0E` 睡眠修正方法**
+<table>
+  <tr>
+    <td><a href="https://youtu.be/NmBfgOanCyk" title="Video By Greer Viau"><img src="https://github.com/commaai/openpilot/assets/8762862/2f7112ae-f748-4f39-b617-fabd689c3772"></a></td>
+    <td><a href="https://youtu.be/VHKyqZ7t8Gw" title="Video By Logan LeGrand"><img src="https://github.com/commaai/openpilot/assets/8762862/92351544-2833-40d7-9e0b-7ef7ae37ec4c"></a></td>
+    <td><a href="https://youtu.be/SUIZYzxtMQs" title="A drive to Taco Bell"><img src="https://github.com/commaai/openpilot/assets/8762862/05ceefc5-2628-439c-a9b2-89ce77dc6f63"></a></td>
+  </tr>
+</table>
 
-12. **`0D6D` 补丁**
 
-    1. 普通的 `060D` 补丁
-    2. 惠普特殊的 `060D` 补丁
+Using openpilot in a car
+------
 
-13. **仿冒以太网和重置以太网 `BSD Name`**
+To use openpilot in a car, you need four things:
+1. **Supported Device:** a comma 3/3X, available at [comma.ai/shop](https://comma.ai/shop/comma-3x).
+2. **Software:** The setup procedure for the comma 3/3X allows users to enter a URL for custom software. Use the URL `openpilot.comma.ai` to install the release version.
+3. **Supported Car:** Ensure that you have one of [the 275+ supported cars](docs/CARS.md).
+4. **Car Harness:** You will also need a [car harness](https://comma.ai/shop/car-harness) to connect your comma 3/3X to your car.
 
-14. **亮度快捷键**
+We have detailed instructions for [how to install the harness and device in a car](https://comma.ai/setup). Note that it's possible to run openpilot on [other hardware](https://blog.comma.ai/self-driving-car-for-free/), although it's not plug-and-play.
 
-15. **`CMOS` 相关**
+### Branches
+| branch           | URL                                    | description                                                                         |
+|------------------|----------------------------------------|-------------------------------------------------------------------------------------|
+| `release3`         | openpilot.comma.ai                      | This is openpilot's release branch.                                                 |
+| `release3-staging` | openpilot-test.comma.ai                | This is the staging branch for releases. Use it to get new releases slightly early. |
+| `nightly`          | openpilot-nightly.comma.ai             | This is the bleeding edge development branch. Do not expect this to be stable.      |
+| `nightly-dev`      | installer.comma.ai/commaai/nightly-dev | Same as nightly, but includes experimental development features for some cars.      |
 
-    1. `CMOS` 重置补丁
-    2. `CMOS` 内存和 ***RTCMemoryFixup***
+To start developing openpilot
+------
 
-16. **`ACPI` 定制 `USB` 端口**
+openpilot is developed by [comma](https://comma.ai/) and by users like you. We welcome both pull requests and issues on [GitHub](http://github.com/commaai/openpilot).
 
-17. **禁止`PCI`设备**
+* Join the [community Discord](https://discord.comma.ai)
+* Check out [the contributing docs](docs/CONTRIBUTING.md)
+* Check out the [openpilot tools](tools/)
+* Read about the [development workflow](docs/WORKFLOW.md)
+* Code documentation lives at https://docs.comma.ai
+* Information about running openpilot lives on the [community wiki](https://github.com/commaai/openpilot/wiki)
 
-18. **ACPIDebug**
+Want to get paid to work on openpilot? [comma is hiring](https://comma.ai/jobs#open-positions) and offers lots of [bounties](https://comma.ai/bounties) for external contributors.
 
-19. **品牌机器特殊补丁**
+Safety and Testing
+----
 
-    1. `Dell`机器特殊补丁
-    2. 小新 PRO13 特殊补丁
-    3. ThinkPad 机器专用补丁
+* openpilot observes [ISO26262](https://en.wikipedia.org/wiki/ISO_26262) guidelines, see [SAFETY.md](docs/SAFETY.md) for more details.
+* openpilot has software-in-the-loop [tests](.github/workflows/selfdrive_tests.yaml) that run on every commit.
+* The code enforcing the safety model lives in panda and is written in C, see [code rigor](https://github.com/commaai/panda#code-rigor) for more details.
+* panda has software-in-the-loop [safety tests](https://github.com/commaai/panda/tree/master/tests/safety).
+* Internally, we have a hardware-in-the-loop Jenkins test suite that builds and unit tests the various processes.
+* panda has additional hardware-in-the-loop [tests](https://github.com/commaai/panda/blob/master/Jenkinsfile).
+* We run the latest openpilot in a testing closet containing 10 comma devices continuously replaying routes.
 
-20. **`I2C` 专用部件**
+Licensing
+------
 
-21. **声卡 `IRQ` 补丁**
+openpilot is released under the MIT license. Some parts of the software are released under other licenses as specified.
 
-22. **`SSDT`屏蔽独显方法**
+Any user of this software shall indemnify and hold harmless Comma.ai, Inc. and its directors, officers, employees, agents, stockholders, affiliates, subcontractors and customers from and against all allegations, claims, actions, suits, demands, damages, liabilities, obligations, losses, settlements, judgments, costs and expenses (including without limitation attorneys’ fees and costs) which arise out of, relate to or result from any use of this software by user.
 
-**常见驱动加载顺序：**
+**THIS IS ALPHA QUALITY SOFTWARE FOR RESEARCH PURPOSES ONLY. THIS IS NOT A PRODUCT.
+YOU ARE RESPONSIBLE FOR COMPLYING WITH LOCAL LAWS AND REGULATIONS.
+NO WARRANTY EXPRESSED OR IMPLIED.**
 
-   1. config-1-Lilu-SMC-WEG-ALC 驱动列表
-   2. config-2-PS2 键盘驱动列表
-   3. config-3-BCM 无线和蓝牙驱动列表
-   4. config-4-I2C 驱动列表
-   5. config-5-PS2Smart 键盘驱动列表
+User Data and comma Account
+------
 
-### Credits
+By default, openpilot uploads the driving data to our servers. You can also access your data through [comma connect](https://connect.comma.ai/). We use your data to train better models and improve openpilot for everyone.
 
-- 特别感谢：
-  - @宪武 制作的适用于 **[OpenCore](https://github.com/acidanthera/OpenCorePkg)** 的 ACPI 部件补丁
-  - @Bat.bat, @黑果小兵, @套陆, @iStar丶Forever 审核完善
+openpilot is open source software: the user is free to disable data collection if they wish to do so.
 
-- 感谢：
-  - @冬瓜-X1C5th
-  - @OC-xlivans
-  - @Air 13 IWL-GZ-Big Orange (OC perfect)
-  - @子骏oc IWL
-  - @大勇-小新air13-OC-划水小白
-  - ......
+openpilot logs the road-facing cameras, CAN, GPS, IMU, magnetometer, thermal sensors, crashes, and operating system logs.
+The driver-facing camera is only logged if you explicitly opt-in in settings. The microphone is not recorded.
 
-- Thanks for:
-  - [Acidanthera](https://github.com/acidanthera) Maintaining:
-    - [AppleSupportPkg](https://github.com/acidanthera/AppleSupportPkg)
-    - [MacInfoPkg](https://github.com/acidanthera/MacInfoPkg)
-    - [OpenCorePkg](https://github.com/acidanthera/OpenCorePkg)
+By using openpilot, you agree to [our Privacy Policy](https://comma.ai/privacy). You understand that use of this software or its related services will generate certain types of user data, which may be logged and stored at the sole discretion of comma. By accepting this agreement, you grant an irrevocable, perpetual, worldwide right to comma for the use of this data.
